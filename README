@@ -1,0 +1,32 @@
+ncpop : a very simple ncurses popup engine
+==========================================
+
+ncpop is a little library to create your own
+ncurses menus in python.
+
+This can be (slightly) useful for command-line
+extermists who use minimal windows manager.
+Especially if you are tired to look for a key
+combination for each wifi network you know or
+too lazy to connect by hand.
+
+There is a small function provided to relaunch
+the app in a new terminal of your choice. It
+allows the application to be run from a key
+combination. You can also match the terminal
+name with your favorite wm to apply special 
+appearances to your popups.
+
+Note about security : some of the useful
+utilities which can be written using ncprop,
+must be run with root privileges.
+This means you should be careful when writing
+such an application. I suggest moving your
+program somewhere safe, like /usr/local/bin
+(not as a symlink !), and specifying full 
+path name as external programs names. Then,
+if you are confident in your app's security
+you can add it in the NOPASSWD list of your
+sudoers (something bad still can happen,
+use it at your own risk).
+
