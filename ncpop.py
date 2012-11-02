@@ -28,17 +28,50 @@ def _launch_work(scr, el, worker):
     _curse_mode(scr)
     return ret == 0
 
-def _disp_title(scr, title):
+def _disp_title(scr, title, t_size):
+    if t_size[1] < len(title):
+        title = title[:t_size[1]-1]
     scr.addstr(title + "\n")
     scr.addstr(''.join([ '-' for k in range(len(title)) ]) + "\n")
 
-def _disp_choices(scr, els, sel):
-    for k,c in enumerate(els):
+def _flush_to_endline(scr, y, x):
+    _,cap_x = scr.getmaxyx()
+    scr.addstr(y, x, ''.join([ " " for k in range(x, cap_x-1)]))
+
+def _disp_choices(scr, els, sel, t_size):
+    y,_ = scr.getyx()
+    for k in range(t_size[0]-y):
+        if k >= len(els):
+            _flush_to_endline(scr, y, 0)
+            continue
+
+        c = els[k]
+        if t_size[1] < len(c):
+            c = c[:t_size[1]-1]
+
         if k == sel:
             mode = curses.A_STANDOUT
         else:
             mode = curses.A_NORMAL
-        scr.addstr(c + "\n",mode)
+        scr.addstr(y, 0, c, mode)
+
+        _flush_to_endline(scr, y, len(c))
+        y += 1
+
+def _comp_scroll(scr, selected, fst_disp):
+    y,x = scr.getyx()
+    cap_y,_ = scr.getmaxyx()
+    n_disps = cap_y - y
+    lst_disp = fst_disp + n_disps - 1
+
+    if selected < fst_disp:
+        fst_disp = selected
+        lst_disp = fst_disp + n_disps - 1
+    elif selected > lst_disp:
+        fst_disp = selected - n_disps + 1
+        lst_disp = selected
+
+    return fst_disp,lst_disp
 
 def _curse_engine(scr, title, els, worker):
     # encoding
@@ -48,20 +81,44 @@ def _curse_engine(scr, title, els, worker):
     curses.use_default_colors()
     curses.curs_set(0)
 
+    first_disp = 0
     selected = 0
 
     while True:
+        t_size = list(scr.getmaxyx())
+
+        if t_size[0] < 3:
+            scr.refresh()
+            continue
+
+        # popup title
         scr.move(0,0)
-        _disp_title(scr, title)
-        _disp_choices(scr, els, selected)
+        _disp_title(scr, title, t_size)
+
+        # popup content
+        first_disp, last_disp = _comp_scroll(scr, selected, first_disp)
+        disp_width = last_disp - first_disp + 1
+        _disp_choices(scr, els[first_disp:last_disp+1],
+                selected - first_disp, t_size)
+
         scr.refresh()
         p_key = scr.getch()
         if p_key == curses.KEY_UP:
-            if selected != 0:
-                selected -= 1
+            selected = max(0, selected - 1)
         elif p_key == curses.KEY_DOWN:
-            if selected != len(els)-1:
-                selected += 1
+            selected = min(len(els)-1, selected + 1)
+        elif p_key == curses.KEY_PPAGE:
+            shift = disp_width//2
+            selected = max(0, selected - shift)
+            first_disp = max(0, first_disp - shift)
+        elif p_key == curses.KEY_NPAGE:
+            shift = disp_width//2
+            selected = min(len(els)-1, selected + shift)
+            first_disp = min(len(els)-disp_width, first_disp + shift)
+        elif p_key == curses.KEY_HOME:
+            selected = 0
+        elif p_key == curses.KEY_END:
+            selected = len(els)-1
         elif p_key == ord('q'):
             return 0
         elif p_key == ord('\n'):
