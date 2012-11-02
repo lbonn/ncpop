@@ -29,14 +29,15 @@ def _launch_work(scr, el, worker):
     return ret == 0
 
 def _disp_title(scr, title, t_size):
-    if t_size[1] < len(title):
+    if t_size[1] <= len(title):
         title = title[:t_size[1]-1]
     scr.addstr(title + "\n")
     scr.addstr(''.join([ '-' for k in range(len(title)) ]) + "\n")
 
 def _flush_to_endline(scr, y, x):
     _,cap_x = scr.getmaxyx()
-    scr.addstr(y, x, ''.join([ " " for k in range(x, cap_x-1)]))
+    if x < cap_x:
+        scr.addstr(y, x, ''.join([ " " for k in range(x, cap_x-1)]))
 
 def _disp_choices(scr, els, sel, t_size):
     y,_ = scr.getyx()
@@ -114,7 +115,7 @@ def _curse_engine(scr, title, els, worker):
         elif p_key == curses.KEY_NPAGE:
             shift = disp_width//2
             selected = min(len(els)-1, selected + shift)
-            first_disp = min(len(els)-disp_width, first_disp + shift)
+            first_disp = min(max(0,len(els)-disp_width), first_disp + shift)
         elif p_key == curses.KEY_HOME:
             selected = 0
         elif p_key == curses.KEY_END:
