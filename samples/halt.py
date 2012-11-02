@@ -17,7 +17,7 @@ systemctl_path = "/usr/bin/systemctl"
 
 def cmd_handler(cmd):
     if cmd == 'Shutdown':
-        inst = 'halt'
+        inst = 'poweroff'
     elif cmd == 'Reboot':
         inst = 'reboot'
     elif cmd == 'Suspend':
