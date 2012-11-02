@@ -104,9 +104,9 @@ def _curse_engine(scr, title, els, worker):
 
         scr.refresh()
         p_key = scr.getch()
-        if p_key == curses.KEY_UP:
+        if p_key == curses.KEY_UP or p_key == ord('k'):
             selected = max(0, selected - 1)
-        elif p_key == curses.KEY_DOWN:
+        elif p_key == curses.KEY_DOWN or p_key == ord('j'):
             selected = min(len(els)-1, selected + 1)
         elif p_key == curses.KEY_PPAGE:
             shift = disp_width//2
