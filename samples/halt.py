@@ -12,7 +12,7 @@ import sys
 import ncpop
 
 app_title = "What to do ?"
-term_name = "/usr/bin/urxvt -geometry 40x15 -title halter -name halter"
+term_name = "/usr/bin/urxvt -geometry 15x6 -title halter -name halter"
 systemctl_path = "/usr/bin/systemctl"
 
 def cmd_handler(cmd):

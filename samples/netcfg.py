@@ -12,7 +12,7 @@ import sys
 import ncpop
 
 app_title = "ncf : select a wifi network"
-term_name = "/usr/bin/urxvt -geometry 40x30 -title ncfg -name ncfg"
+term_name = "/usr/bin/urxvt -geometry 30x20 -title ncfg -name ncfg"
 netcfg_path = "/usr/bin/netcfg"
 network_d_path = "/etc/network.d"
 
