@@ -28,35 +28,32 @@ def _launch_work(scr, el, worker):
     _curse_mode(scr)
     return ret == 0
 
-def _disp_title(scr, title, t_size):
-    if t_size[1] <= len(title):
-        title = title[:t_size[1]-1]
-    scr.addstr(title + "\n")
-    scr.addstr(''.join([ '-' for k in range(len(title)) ]) + "\n")
+def _blank_screen(scr):
+    cap_y,cap_x = list(scr.getmaxyx())
+    for y in range(cap_y):
+        scr.addstr(y, 0, ''.join([ " " for k in range(cap_x-1)]))
 
-def _flush_to_endline(scr, y, x):
+def _disp_title(scr, title):
     _,cap_x = scr.getmaxyx()
-    if x < cap_x:
-        scr.addstr(y, x, ''.join([ " " for k in range(x, cap_x-1)]))
-
-def _disp_choices(scr, els, sel, t_size):
     y,_ = scr.getyx()
-    for k in range(t_size[0]-y):
-        if k >= len(els):
-            _flush_to_endline(scr, y, 0)
-            continue
+    if len(title) >= cap_x:
+        title = title[:cap_x-1]
+    scr.addstr(y,0,title)
+    scr.addstr(y+1,0,''.join([ '-' for k in range(len(title)) ]))
+    scr.move(y+2, 0)
 
-        c = els[k]
-        if t_size[1] < len(c):
-            c = c[:t_size[1]-1]
+def _disp_choices(scr, els, sel):
+    _,cap_x = scr.getmaxyx()
+    y,_ = scr.getyx()
+    for k,c in enumerate(els):
+        if len(c) >= cap_x:
+            c = c[:cap_x-1]
 
         if k == sel:
             mode = curses.A_STANDOUT
         else:
             mode = curses.A_NORMAL
         scr.addstr(y, 0, c, mode)
-
-        _flush_to_endline(scr, y, len(c))
         y += 1
 
 def _comp_scroll(scr, selected, fst_disp):
@@ -86,21 +83,21 @@ def _curse_engine(scr, title, els, worker):
     selected = 0
 
     while True:
-        t_size = list(scr.getmaxyx())
-
-        if t_size[0] < 3:
+        cap_y,_ = list(scr.getmaxyx())
+        if cap_y < 3:
             scr.refresh()
             continue
 
-        # popup title
+        _blank_screen(scr)
         scr.move(0,0)
-        _disp_title(scr, title, t_size)
+        # popup title
+        _disp_title(scr, title)
 
         # popup content
         first_disp, last_disp = _comp_scroll(scr, selected, first_disp)
         disp_width = last_disp - first_disp + 1
         _disp_choices(scr, els[first_disp:last_disp+1],
-                selected - first_disp, t_size)
+                selected - first_disp)
 
         scr.refresh()
         p_key = scr.getch()
