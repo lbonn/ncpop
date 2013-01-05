@@ -5,12 +5,12 @@ import shlex
 import signal
 import sys
 
-def _curse_mode(scr):
+def curse_mode(scr):
     curses.noecho()
     curses.cbreak()
     scr.keypad(1)
 
-def _uncurse_mode(scr):
+def uncurse_mode(scr):
     curses.echo()
     curses.nocbreak()
     scr.keypad(0)
@@ -20,20 +20,20 @@ def _launch_work(scr, el, worker):
     scr.clear()
     scr.refresh()
     scr.move(0,0)
-    _uncurse_mode(scr)
+    uncurse_mode(scr)
 
     ret = worker(el)
 
     # back to curse mode
-    _curse_mode(scr)
+    curse_mode(scr)
     return ret == 0
 
-def _blank_screen(scr):
+def blank_screen(scr):
     cap_y,cap_x = list(scr.getmaxyx())
     for y in range(cap_y):
         scr.addstr(y, 0, ''.join([ " " for k in range(cap_x-1)]))
 
-def _disp_title(scr, title):
+def disp_title(scr, title):
     _,cap_x = scr.getmaxyx()
     y,_ = scr.getyx()
     if len(title) >= cap_x:
@@ -42,7 +42,7 @@ def _disp_title(scr, title):
     scr.addstr(y+1,0,''.join([ '-' for k in range(len(title)) ]))
     scr.move(y+2, 0)
 
-def _disp_choices(scr, els, sel):
+def disp_choices(scr, els, sel):
     _,cap_x = scr.getmaxyx()
     y,_ = scr.getyx()
     for k,c in enumerate(els):
@@ -71,7 +71,7 @@ def _comp_scroll(scr, selected, fst_disp):
 
     return fst_disp,lst_disp
 
-def _curse_engine(scr, title, els, worker):
+def curse_engine(scr, title, els, worker):
     # encoding
     locale.setlocale(locale.LC_ALL, '')
     code = locale.getpreferredencoding()
@@ -88,15 +88,15 @@ def _curse_engine(scr, title, els, worker):
             scr.refresh()
             continue
 
-        _blank_screen(scr)
+        blank_screen(scr)
         scr.move(0,0)
         # popup title
-        _disp_title(scr, title)
+        disp_title(scr, title)
 
         # popup content
         first_disp, last_disp = _comp_scroll(scr, selected, first_disp)
         disp_width = last_disp - first_disp + 1
-        _disp_choices(scr, els[first_disp:last_disp+1],
+        disp_choices(scr, els[first_disp:last_disp+1],
                 selected - first_disp)
 
         scr.refresh()
@@ -126,7 +126,7 @@ def _curse_engine(scr, title, els, worker):
                 scr.getch()
                 scr.clear()
 
-def _sigint_handler(signal, frame):
+def sigint_handler(signal, frame):
     sys.exit(0)
 
 # ----
@@ -140,5 +140,5 @@ def exec_in_term(app, term_cmd):
     os.execve(cmd, args, os.environ)
 
 def popup(argv, title, els, worker):
-    signal.signal(signal.SIGINT, _sigint_handler)
-    curses.wrapper(_curse_engine, title, els, worker)
+    signal.signal(signal.SIGINT, sigint_handler)
+    curses.wrapper(curse_engine, title, els, worker)
