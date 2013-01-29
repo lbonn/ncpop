@@ -15,7 +15,7 @@ def uncurse_mode(scr):
     curses.nocbreak()
     scr.keypad(0)
 
-def _launch_work(scr, el, worker):
+def launch_work(scr, el, worker):
     # screen in normal mode
     scr.clear()
     scr.refresh()
@@ -56,7 +56,7 @@ def disp_choices(scr, els, sel):
         scr.addstr(y, 0, c, mode)
         y += 1
 
-def _comp_scroll(scr, selected, fst_disp):
+def comp_scroll(scr, selected, fst_disp):
     y,x = scr.getyx()
     cap_y,_ = scr.getmaxyx()
     n_disps = cap_y - y
@@ -94,7 +94,7 @@ def curse_engine(scr, title, els, worker):
         disp_title(scr, title)
 
         # popup content
-        first_disp, last_disp = _comp_scroll(scr, selected, first_disp)
+        first_disp, last_disp = comp_scroll(scr, selected, first_disp)
         disp_width = last_disp - first_disp + 1
         disp_choices(scr, els[first_disp:last_disp+1],
                 selected - first_disp)
@@ -120,7 +120,7 @@ def curse_engine(scr, title, els, worker):
         elif p_key == ord('q'):
             return 0
         elif p_key == ord('\n'):
-            if _launch_work(scr, els[selected], worker):
+            if launch_work(scr, els[selected], worker):
                 return 0
             else:
                 scr.getch()
